@@ -1,17 +1,26 @@
 import React, { useState } from "react";
 import "./App.css";
 
-function City({state, estPop, city}) {
-  return <div>
-    {city}, {state}
-  </div>;
+function City({state, estPop, city, taxReturns}) {
+  return (
+    <div> 
+      <strong>{state}, {city} </strong>
+      <ul>
+        <li>State: {state}</li>
+        <li>City: {city}</li>
+        <li>Estimated Population: {estPop}</li>
+        <li>Tax Returns Filed: {taxReturns}</li>
+      </ul>
+      <br></br>
+    </div>
+  );
 }
 
 function ZipSearchField({handleChange}) {
   return <div>
     <label>
       Zip Code:
-      <input type="text" name="name" onChange={handleChange}/>
+      <input type="text" name="name" id="input" onChange={handleChange}/>
     </label>
 </div>;
 }
@@ -23,13 +32,12 @@ function App() {
   const[zipResults, setZipResults] = useState([])
 
   const handleChange = (event) => {
-    const zipInput = event.target.value
+    const zipInput = document.getElementById('input').value
     setZipCode(zipInput)
 
     if( zipInput.length === 5 ) {
       fetch('https://ctp-zip-api.herokuapp.com/zip/'+zipInput)
-      .then((response) => response.json())
-      .then((data) => console.log(data))
+      .then((response) => response.json())      
       .then((data) => setZipResults(data))
     }
     else {
@@ -46,12 +54,17 @@ function App() {
       <br></br>
       <div className="mx-auto" style={{ maxWidth: 400 }}>
         <ZipSearchField handleChange={handleChange}/>
-        <div>
-          <City 
-            state = {zipResults.State}
-            estPop = {zipResults.EstimatedPopulation}
-            city = {zipResults.City}
-          />
+        <div><br></br>
+          {zipResults.map((data) => (
+            <City 
+              state = {data.State}
+              city = {data.City}
+              estPop = {data.EstimatedPopulation}
+              taxReturns = {data.TaxReturnsFiled}
+              key = {data.RecordNumber}
+            />
+          ))}
+          {zipResults.length === 0 && <strong><p>No results found</p></strong>}
         </div>
       </div>
     </div>
